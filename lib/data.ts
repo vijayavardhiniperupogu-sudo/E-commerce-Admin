@@ -1,5 +1,7 @@
 // lib/data.ts
+
 export type ProductType = {
+  id: string;
   name: string;
   price: number;
   stock: number;
@@ -17,10 +19,11 @@ export type UserType = {
   name: string;
 };
 
+// ✅ Fixed: added id
 export const productsData: ProductType[] = [
-  { name: "iPhone 13", price: 70000, stock: 25 },
-  { name: "Samsung S21", price: 60000, stock: 15 },
-  { name: "OnePlus 11", price: 50000, stock: 10 },
+  { id: "1", name: "iPhone 13", price: 70000, stock: 25 },
+  { id: "2", name: "Samsung S21", price: 60000, stock: 15 },
+  { id: "3", name: "OnePlus 11", price: 50000, stock: 10 },
 ];
 
 export const ordersData: OrderType[] = [
