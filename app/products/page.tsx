@@ -4,41 +4,29 @@ import { useState, useEffect } from "react";
 import { productsData, ProductType } from "@/lib/data";
 
 export default function ProductsPage() {
-  // Load products from localStorage, fallback to productsData
   const [products, setProducts] = useState<ProductType[]>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("products");
-      try {
-        return stored ? JSON.parse(stored) : productsData;
-      } catch {
-        return productsData;
-      }
+      return stored ? JSON.parse(stored) : productsData;
     }
     return productsData;
   });
 
   const [showForm, setShowForm] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [formData, setFormData] = useState({ name: "", price: "", stock: "" });
 
-  const [formData, setFormData] = useState({
-    name: "",
-    price: "",
-    stock: "",
-  });
-
-  // Save products to localStorage
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
 
-  // Open Add Product form
   const openAddForm = () => {
     setFormData({ name: "", price: "", stock: "" });
     setEditIndex(null);
     setShowForm(true);
   };
 
-  // Open Edit Product form
   const openEditForm = (index: number) => {
     const p = products[index];
     setFormData({
@@ -50,7 +38,6 @@ export default function ProductsPage() {
     setShowForm(true);
   };
 
-  // Save Product (Add or Edit)
   const saveProduct = () => {
     if (!formData.name || !formData.price || !formData.stock) return;
 
@@ -71,7 +58,6 @@ export default function ProductsPage() {
     setShowForm(false);
   };
 
-  // ❌ Delete Product (Typed)
   const deleteProduct = (index: number) => {
     const updated = products.filter((_: ProductType, i: number) => i !== index);
     setProducts(updated);
@@ -81,7 +67,6 @@ export default function ProductsPage() {
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-4 text-gray-800">Products</h1>
 
-      {/* Add Product Button */}
       <button
         onClick={openAddForm}
         className="mb-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -89,7 +74,6 @@ export default function ProductsPage() {
         Add Product
       </button>
 
-      {/* Products Table */}
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-200">
@@ -100,16 +84,12 @@ export default function ProductsPage() {
               <th className="p-3">Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {products.map((p, index) => (
               <tr key={index} className="border-t">
                 <td className="p-3">{p.name}</td>
                 <td className="p-3">
-                  {p.price.toLocaleString("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                  })}
+                  {p.price.toLocaleString("en-IN", { style: "currency", currency: "INR" })}
                 </td>
                 <td className="p-3">{p.stock}</td>
                 <td className="p-3 flex gap-2">
@@ -132,7 +112,6 @@ export default function ProductsPage() {
         </table>
       </div>
 
-      {/* Add/Edit Popup Form */}
       {showForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow w-80">
@@ -145,42 +124,28 @@ export default function ProductsPage() {
               placeholder="Name"
               value={formData.name}
               className="w-full mb-2 p-2 border rounded"
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
-
             <input
               type="number"
               placeholder="Price"
               value={formData.price}
               className="w-full mb-2 p-2 border rounded"
-              onChange={(e) =>
-                setFormData({ ...formData, price: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
             />
-
             <input
               type="number"
               placeholder="Stock"
               value={formData.stock}
               className="w-full mb-4 p-2 border rounded"
-              onChange={(e) =>
-                setFormData({ ...formData, stock: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
             />
 
             <div className="flex justify-between">
-              <button
-                onClick={() => setShowForm(false)}
-                className="bg-gray-400 text-white px-3 py-1 rounded"
-              >
+              <button onClick={() => setShowForm(false)} className="bg-gray-400 text-white px-3 py-1 rounded">
                 Cancel
               </button>
-              <button
-                onClick={saveProduct}
-                className="bg-blue-600 text-white px-3 py-1 rounded"
-              >
+              <button onClick={saveProduct} className="bg-blue-600 text-white px-3 py-1 rounded">
                 Save
               </button>
             </div>

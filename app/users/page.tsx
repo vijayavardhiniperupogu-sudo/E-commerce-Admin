@@ -18,7 +18,6 @@ export default function UsersPage() {
               <th className="p-3">Name</th>
             </tr>
           </thead>
-
           <tbody>
             {users.map((user) => (
               <tr key={user.id} className="border-t">

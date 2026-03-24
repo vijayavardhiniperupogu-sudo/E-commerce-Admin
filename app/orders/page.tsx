@@ -20,15 +20,12 @@ export default function OrdersPage() {
               <th className="p-3">Status</th>
             </tr>
           </thead>
-
           <tbody>
             {orders.map((order) => (
               <tr key={order.id} className="border-t">
                 <td className="p-3">#{order.id}</td>
                 <td className="p-3">{order.customer}</td>
-                <td className="p-3">
-                  ₹{order.amount.toLocaleString("en-IN")}
-                </td>
+                <td className="p-3">₹{order.amount.toLocaleString("en-IN")}</td>
                 <td
                   className={`p-3 font-semibold ${
                     order.status === "Delivered"
