@@ -4,17 +4,7 @@ import { useState, useEffect } from "react";
 import { productsData, ProductType } from "@/lib/data";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<ProductType[]>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("products");
-      try {
-        return stored ? JSON.parse(stored) : productsData;
-      } catch {
-        return productsData;
-      }
-    }
-    return productsData;
-  });
+  const [products, setProducts] = useState<ProductType[]>([]);
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -28,6 +18,21 @@ export default function ProductsPage() {
     price: 0,
     stock: 0,
   });
+
+  // ✅ FIX: safe localStorage load
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("products");
+      if (stored) {
+        const parsed: ProductType[] = JSON.parse(stored);
+        setProducts(parsed);
+      } else {
+        setProducts(productsData);
+      }
+    } catch {
+      setProducts(productsData);
+    }
+  }, []);
 
   // Save to localStorage
   useEffect(() => {
@@ -71,8 +76,9 @@ export default function ProductsPage() {
     setShowForm(false);
   };
 
+  // ✅ FIX: explicit typing
   const deleteProduct = (id: string) => {
-    const updated = products.filter((p) => p.id !== id);
+    const updated = products.filter((p: ProductType) => p.id !== id);
     setProducts(updated);
   };
 
@@ -97,8 +103,9 @@ export default function ProductsPage() {
               <th className="p-3">Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {products.map((p) => (
+            {products.map((p: ProductType) => (
               <tr key={p.id} className="border-t">
                 <td className="p-3">{p.name}</td>
                 <td className="p-3">
@@ -108,6 +115,7 @@ export default function ProductsPage() {
                   })}
                 </td>
                 <td className="p-3">{p.stock}</td>
+
                 <td className="p-3 flex gap-2">
                   <button
                     onClick={() => openEditForm(p)}
@@ -115,6 +123,7 @@ export default function ProductsPage() {
                   >
                     Edit
                   </button>
+
                   <button
                     onClick={() => deleteProduct(p.id)}
                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
@@ -178,6 +187,7 @@ export default function ProductsPage() {
               >
                 Cancel
               </button>
+
               <button
                 onClick={saveProduct}
                 className="bg-blue-600 text-white px-3 py-1 rounded"
