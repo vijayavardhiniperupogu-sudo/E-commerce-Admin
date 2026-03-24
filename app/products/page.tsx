@@ -1,14 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { productsData } from "@/lib/data";
+import { productsData, ProductType } from "@/lib/data";
 
 export default function ProductsPage() {
-  // 🔹 Load from localStorage
-  const [products, setProducts] = useState(() => {
+  // Load products from localStorage, fallback to productsData
+  const [products, setProducts] = useState<ProductType[]>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("products");
-      return stored ? JSON.parse(stored) : productsData;
+      try {
+        return stored ? JSON.parse(stored) : productsData;
+      } catch {
+        return productsData;
+      }
     }
     return productsData;
   });
@@ -22,19 +26,19 @@ export default function ProductsPage() {
     stock: "",
   });
 
-  // 🔹 Save to localStorage
+  // Save products to localStorage
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
 
-  // ➕ Open Add
+  // Open Add Product form
   const openAddForm = () => {
     setFormData({ name: "", price: "", stock: "" });
     setEditIndex(null);
     setShowForm(true);
   };
 
-  // ✏️ Open Edit
+  // Open Edit Product form
   const openEditForm = (index: number) => {
     const p = products[index];
     setFormData({
@@ -46,35 +50,30 @@ export default function ProductsPage() {
     setShowForm(true);
   };
 
-  // 💾 Save (Add / Edit)
+  // Save Product (Add or Edit)
   const saveProduct = () => {
     if (!formData.name || !formData.price || !formData.stock) return;
 
+    const newProduct: ProductType = {
+      name: formData.name,
+      price: Number(formData.price),
+      stock: Number(formData.stock),
+    };
+
     if (editIndex !== null) {
       const updated = [...products];
-      updated[editIndex] = {
-        name: formData.name,
-        price: Number(formData.price),
-        stock: Number(formData.stock),
-      };
+      updated[editIndex] = newProduct;
       setProducts(updated);
     } else {
-      setProducts([
-        ...products,
-        {
-          name: formData.name,
-          price: Number(formData.price),
-          stock: Number(formData.stock),
-        },
-      ]);
+      setProducts([...products, newProduct]);
     }
 
     setShowForm(false);
   };
 
-  // ❌ Delete
+  // Delete Product
   const deleteProduct = (index: number) => {
-    const updated = products.filter((_, i) => i !== index);
+    const updated = products.filter((_: ProductType, i: number) => i !== index);
     setProducts(updated);
   };
 
@@ -82,7 +81,7 @@ export default function ProductsPage() {
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-4 text-gray-800">Products</h1>
 
-      {/* Add Button */}
+      {/* Add Product Button */}
       <button
         onClick={openAddForm}
         className="mb-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -90,7 +89,7 @@ export default function ProductsPage() {
         Add Product
       </button>
 
-      {/* Table */}
+      {/* Products Table */}
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-200">
@@ -106,16 +105,13 @@ export default function ProductsPage() {
             {products.map((p, index) => (
               <tr key={index} className="border-t">
                 <td className="p-3">{p.name}</td>
-
                 <td className="p-3">
-                  {Number(p.price).toLocaleString("en-IN", {
+                  {p.price.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "INR",
                   })}
                 </td>
-
                 <td className="p-3">{p.stock}</td>
-
                 <td className="p-3 flex gap-2">
                   <button
                     onClick={() => openEditForm(index)}
@@ -123,7 +119,6 @@ export default function ProductsPage() {
                   >
                     Edit
                   </button>
-
                   <button
                     onClick={() => deleteProduct(index)}
                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
@@ -137,7 +132,7 @@ export default function ProductsPage() {
         </table>
       </div>
 
-      {/* Popup Form */}
+      {/* Add/Edit Popup Form */}
       {showForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow w-80">
@@ -182,7 +177,6 @@ export default function ProductsPage() {
               >
                 Cancel
               </button>
-
               <button
                 onClick={saveProduct}
                 className="bg-blue-600 text-white px-3 py-1 rounded"
