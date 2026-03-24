@@ -1,17 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { ordersData, OrderType } from "@/lib/data";
 
 export default function OrdersPage() {
-  const [orders] = useState([
-    { id: 101, customer: "Ravi", amount: 1200, status: "Delivered" },
-    { id: 102, customer: "Sita", amount: 800, status: "Pending" },
-    { id: 103, customer: "Arjun", amount: 1500, status: "Shipped" },
-  ]);
+  const [orders] = useState<OrderType[]>(ordersData);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">Orders</h1>
+      <h1 className="text-3xl font-bold mb-4 text-gray-800">Orders</h1>
 
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full text-left">

@@ -71,7 +71,7 @@ export default function ProductsPage() {
     setShowForm(false);
   };
 
-  // Delete Product
+  // ❌ Delete Product (Typed)
   const deleteProduct = (index: number) => {
     const updated = products.filter((_: ProductType, i: number) => i !== index);
     setProducts(updated);
