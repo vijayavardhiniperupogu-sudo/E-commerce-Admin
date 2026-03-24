@@ -7,14 +7,27 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<ProductType[]>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("products");
-      return stored ? JSON.parse(stored) : productsData;
+      try {
+        return stored ? JSON.parse(stored) : productsData;
+      } catch {
+        return productsData;
+      }
     }
     return productsData;
   });
 
   const [showForm, setShowForm] = useState(false);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ name: "", price: "", stock: "" });
+  const [editId, setEditId] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState<{
+    name: string;
+    price: number;
+    stock: number;
+  }>({
+    name: "",
+    price: 0,
+    stock: 0,
+  });
 
   // Save to localStorage
   useEffect(() => {
@@ -22,44 +35,44 @@ export default function ProductsPage() {
   }, [products]);
 
   const openAddForm = () => {
-    setFormData({ name: "", price: "", stock: "" });
-    setEditIndex(null);
+    setFormData({ name: "", price: 0, stock: 0 });
+    setEditId(null);
     setShowForm(true);
   };
 
-  const openEditForm = (index: number) => {
-    const p = products[index];
+  const openEditForm = (product: ProductType) => {
     setFormData({
-      name: p.name,
-      price: p.price.toString(),
-      stock: p.stock.toString(),
+      name: product.name,
+      price: product.price,
+      stock: product.stock,
     });
-    setEditIndex(index);
+    setEditId(product.id);
     setShowForm(true);
   };
 
   const saveProduct = () => {
-    if (!formData.name || !formData.price || !formData.stock) return;
+    if (!formData.name || formData.price <= 0 || formData.stock < 0) return;
 
-    const newProduct: ProductType = {
-      name: formData.name,
-      price: Number(formData.price),
-      stock: Number(formData.stock),
-    };
-
-    if (editIndex !== null) {
-      const updated = [...products];
-      updated[editIndex] = newProduct;
+    if (editId) {
+      const updated = products.map((p) =>
+        p.id === editId ? { ...p, ...formData } : p
+      );
       setProducts(updated);
     } else {
+      const newProduct: ProductType = {
+        id: Date.now().toString(),
+        name: formData.name,
+        price: formData.price,
+        stock: formData.stock,
+      };
       setProducts([...products, newProduct]);
     }
 
     setShowForm(false);
   };
 
-  const deleteProduct = (index: number) => {
-    const updated = products.filter((_: ProductType, i: number) => i !== index);
+  const deleteProduct = (id: string) => {
+    const updated = products.filter((p) => p.id !== id);
     setProducts(updated);
   };
 
@@ -85,22 +98,25 @@ export default function ProductsPage() {
             </tr>
           </thead>
           <tbody>
-            {products.map((p, index) => (
-              <tr key={index} className="border-t">
+            {products.map((p) => (
+              <tr key={p.id} className="border-t">
                 <td className="p-3">{p.name}</td>
                 <td className="p-3">
-                  {p.price.toLocaleString("en-IN", { style: "currency", currency: "INR" })}
+                  {p.price.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                  })}
                 </td>
                 <td className="p-3">{p.stock}</td>
                 <td className="p-3 flex gap-2">
                   <button
-                    onClick={() => openEditForm(index)}
+                    onClick={() => openEditForm(p)}
                     className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => deleteProduct(index)}
+                    onClick={() => deleteProduct(p.id)}
                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                   >
                     Delete
@@ -116,7 +132,7 @@ export default function ProductsPage() {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow w-80">
             <h2 className="text-xl font-bold mb-4">
-              {editIndex !== null ? "Edit Product" : "Add Product"}
+              {editId ? "Edit Product" : "Add Product"}
             </h2>
 
             <input
@@ -124,28 +140,48 @@ export default function ProductsPage() {
               placeholder="Name"
               value={formData.name}
               className="w-full mb-2 p-2 border rounded"
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
             />
+
             <input
               type="number"
               placeholder="Price"
               value={formData.price}
               className="w-full mb-2 p-2 border rounded"
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  price: Number(e.target.value),
+                })
+              }
             />
+
             <input
               type="number"
               placeholder="Stock"
               value={formData.stock}
               className="w-full mb-4 p-2 border rounded"
-              onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  stock: Number(e.target.value),
+                })
+              }
             />
 
             <div className="flex justify-between">
-              <button onClick={() => setShowForm(false)} className="bg-gray-400 text-white px-3 py-1 rounded">
+              <button
+                onClick={() => setShowForm(false)}
+                className="bg-gray-400 text-white px-3 py-1 rounded"
+              >
                 Cancel
               </button>
-              <button onClick={saveProduct} className="bg-blue-600 text-white px-3 py-1 rounded">
+              <button
+                onClick={saveProduct}
+                className="bg-blue-600 text-white px-3 py-1 rounded"
+              >
                 Save
               </button>
             </div>
